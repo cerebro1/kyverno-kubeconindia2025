@@ -1,0 +1,27 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: add-nginx-label
+spec:
+  rules:
+    - name: add-nginx-label
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              operations: ["CREATE", "UPDATE"]
+      preconditions:
+        all:
+          - key: "{{ request.namespace }}"
+            operator: Equals
+            value: "test-mpol"
+      context:
+        - name: label
+          variable:
+            jmesPath: "request.object.metadata.annotations.app"
+      mutate:
+        patchStrategicMerge:
+          metadata:
+            labels:
+              app: "{{label || 'unknown'}}"

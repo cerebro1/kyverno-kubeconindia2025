@@ -1,0 +1,28 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: generate-cm-on-ns
+spec:
+  rules:
+    - name: generate-configmap-from-ns
+      match:
+        any:
+          - resources:
+              kinds:
+                - Namespace
+              operations: ["CREATE","UPDATE"]
+      context:
+        - name: ns
+          apiCall:
+            urlPath: "/api/v1/namespaces/default/pods/test-api"
+      generate:
+        kind: ConfigMap
+        apiVersion: v1
+        name: zk-kafka-address
+        namespace: "{{request.object.metadata.name}}"
+        synchronize: false
+        data:
+          data:
+            KAFKA_ADDRESS: "192.168.10.13:9092,192.168.10.14:9092,192.168.10.15:9092"
+            ZK_ADDRESS: "192.168.10.10:2181,192.168.10.11:2181,192.168.10.12:2181"
+            ENV_LABEL: "{{ ns.metadata.labels.app || 'unknown' }}"

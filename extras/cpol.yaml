@@ -1,0 +1,26 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: verify-image
+spec:
+  validationFailureAction: Enforce
+  rules:
+    - name: verify-image
+      match:
+        any:
+        - resources:
+            kinds:
+              - Pod
+      context:
+        - name: key
+          apiCall:
+            urlPath: "/api/v1/namespaces/{{request.namespace}}/configmaps/keys"
+            method: GET
+            jmesPath: "data.key"
+      verifyImages:
+        - imageReferences:
+            - "docker.io/mohdcode/kyverno*"
+          attestors:
+            - entries:
+                - keys:
+                    publicKeys: "{{key}}"
