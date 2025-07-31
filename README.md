@@ -62,6 +62,11 @@ Each folder contains:
 
 ## 🚀 Running Tests
 
+Each `chainsaw-test.yaml` includes a `create` step to apply the policy. You can swap the policy file name in that step to test either a `ClusterPolicy` or the newer policy types (`ValidatingPolicy`, `ImageValidatingPolicy`, `MutatingPolicy`, `GeneratingPolicy`) on the same resource.
+
+For example, use `cpol.yaml` to test a `ClusterPolicy` with a mutate rule, and switch to `add-nginx-label.yaml` to test a `MutatingPolicy` on the same resource.
+
+
 From the root of this repo, run:
 
 ```bash
