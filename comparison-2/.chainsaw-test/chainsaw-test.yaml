@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/kyverno/chainsaw/main/.schemas/json/test-chainsaw-v1alpha1.json
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: mpol-patch
+spec:
+  steps:
+  - name: create ns
+    try:
+      - apply :
+           file: ns.yaml
+  - name: sleep
+    try:
+    - sleep:
+        duration: 3s
+  - name: craete policy
+    try:
+      - apply :
+           file: ../add-nginx-label.yaml
+           # ../cpol.yaml to test clusterpolicy with mutate
+  - name: sleep
+    try:
+    - sleep:
+        duration: 3s
+  - name: create pod
+    try:
+    - create:
+        file: pod.yaml
+  - name: check patches
+    try:
+    - assert:
+        timeout: 30s
+        file: pod-patched.yaml

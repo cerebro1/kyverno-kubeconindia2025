@@ -1,0 +1,29 @@
+apiVersion: policies.kyverno.io/v1alpha1
+kind: MutatingPolicy
+metadata:
+  name: add-nginx-label
+spec:
+  matchConstraints:
+    resourceRules:
+    - apiGroups: [ "" ]
+      apiVersions: [ "v1" ]
+      operations: [ "CREATE", "UPDATE" ]
+      resources: [ "pods" ]
+  matchConditions:
+  - name: is-test-ns
+    expression: object.metadata.namespace == 'test' 
+  variables:
+     - name: label
+       expression: >-
+        object.metadata.annotations.app
+  mutations:
+  - patchType: ApplyConfiguration
+    applyConfiguration:
+      expression: >
+        Object{
+          metadata: Object.metadata{
+            labels: Object.metadata.labels{
+              app: variables.label
+            }
+          }
+        } 
